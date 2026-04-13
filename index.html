@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>交响 · 乐器人格测试</title>
+    <!-- Chart.js 轻量绘图 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- 清新字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #e2f0da 0%, #c8e0c4 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Quicksand', sans-serif;
+            padding: 20px;
+            color: #1e3a2e;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 750px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border-radius: 42px;
+            box-shadow: 0 20px 40px rgba(40, 70, 40, 0.12), 0 6px 12px rgba(0, 20, 0, 0.05);
+            padding: 28px 24px 32px;
+            border: 1px solid #bcddb0;
+            transition: all 0.2s ease;
+        }
+
+        h1 {
+            font-weight: 500;
+            font-size: 2.2rem;
+            letter-spacing: -0.5px;
+            color: #1f4f2b;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        h1 span {
+            font-size: 1rem;
+            background: #d4e8ca;
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-weight: 500;
+            color: #235b2e;
+            border: 1px solid #a6c89a;
+        }
+
+        .sub-line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            color: #3b6e4a;
+            font-weight: 500;
+        }
+
+        .progress-badge {
+            background: #b1d8a4;
+            padding: 6px 18px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            box-shadow: inset 0 1px 3px #e2f3da;
+        }
+
+        /* 题目卡片 */
+        .question-card {
+            background: #f6fff0e0;
+            border-radius: 32px;
+            padding: 28px 22px;
+            margin: 12px 0 20px;
+            border: 1px solid #c3dfb5;
+            box-shadow: 0 8px 0 #8fb28030;
+        }
+
+        .q-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-bottom: 28px;
+            color: #1a4125;
+        }
+
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 1.5px solid #b1d2a2;
+            border-radius: 60px;
+            padding: 16px 22px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #1e462b;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.15s;
+            box-shadow: 0 4px 0 #b1cfaa;
+            font-family: 'Quicksand', sans-serif;
+            backdrop-filter: blur(4px);
+            line-height: 1.3;
+        }
+
+        .option-btn:hover {
+            background: #e1f3d4;
+            border-color: #7fae70;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #9abb92;
+        }
+
+        .option-btn.selected {
+            background: #c8e6bc;
+            border-color: #4f8250;
+            box-shadow: 0 2px 0 #6f9e6a;
+            transform: translateY(2px);
+            color: #0e3118;
+            font-weight: 600;
+        }
+
+        .action-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .nav-btn {
+            background: #e3f0dc;
+            border: 1.5px solid #95b889;
+            color: #1e4a2a;
+            padding: 12px 26px;
+            border-radius: 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #9dbb94;
+            transition: 0.1s;
+            font-family: 'Quicksand', sans-serif;
+            backdrop-filter: blur(5px);
+            border: 1px solid #b1d0a4;
+        }
+
+        .nav-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #8bb07f;
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.4;
+            transform: none;
+            box-shadow: 0 3px 0 #bccdb5;
+            pointer-events: none;
+        }
+
+        .knowledge-btn {
+            background: #cbe5c0;
+            border: 1px solid #7daa70;
+            box-shadow: 0 2px 0 #7e9e74;
+            padding: 10px 20px;
+        }
+
+        /* 结果区域 */
+        .result-panel {
+            background: #f6fff0e0;
+            border-radius: 32px;
+            padding: 24px 20px;
+            margin-top: 10px;
+            border: 1px solid #b3d7a5;
+        }
+
+        .instrument-highlight {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .inst-name {
+            font-size: 2.6rem;
+            font-weight: 600;
+            color: #194d23;
+            line-height: 1.1;
+        }
+
+        .inst-category {
+            background: #b1daa4;
+            border-radius: 40px;
+            padding: 6px 18px;
+            font-weight: 600;
+            color: #1a4d1a;
+        }
+
+        .desc-text {
+            margin: 16px 0;
+            color: #244e2e;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .role-box, .piece-box {
+            background: #ddecd4;
+            border-radius: 20px;
+            padding: 14px 18px;
+            margin: 16px 0;
+        }
+
+        .chart-container {
+            margin: 20px 0 10px;
+            height: 230px;
+        }
+
+        .category-bars {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 8px;
+            margin: 18px 0;
+        }
+
+        .cat-item {
+            flex: 1 0 100px;
+        }
+
+        .cat-label {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 500;
+        }
+
+        .bar-bg {
+            height: 12px;
+            background: #cddfc1;
+            border-radius: 20px;
+            margin-top: 5px;
+        }
+
+        .bar-fill {
+            height: 12px;
+            border-radius: 20px;
+            background: #3f8252;
+            width: 0%;
+        }
+
+        .retest-btn {
+            background: #b8daab;
+            border: none;
+            padding: 16px 22px;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: #1a4023;
+            width: 100%;
+            margin-top: 18px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #8daf82;
+            transition: 0.1s;
+            border: 1px solid #a1c294;
+        }
+
+        /* 科普浮层 */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #1f3a1fb0;
+            backdrop-filter: blur(3px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+        }
+
+        .modal-card {
+            background: #f1fae9;
+            max-width: 500px;
+            width: 90%;
+            border-radius: 48px;
+            padding: 28px 24px;
+            box-shadow: 0 30px 40px #1e3a1e50;
+            border: 1px solid #bedbad;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-card h3 {
+            font-size: 1.8rem;
+            color: #1f5427;
+            margin-bottom: 12px;
+        }
+
+        .close-modal {
+            float: right;
+            font-size: 28px;
+            cursor: pointer;
+            color: #2a6535;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        footer {
+            margin-top: 10px;
+            color: #3e6a48;
+            text-align: right;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container" id="appContainer">
+    <h1>🎼 听·音识器 
+        <span class="knowledge-btn" id="knowledgeBtn">📖 科普</span>
+    </h1>
+    <div class="sub-line">
+        <div>哪件乐器藏着你的灵魂？</div>
+        <div class="progress-badge" id="progressDisplay">1 / 30</div>
+    </div>
+
+    <!-- 动态区域：测试 or 结果 -->
+    <div id="quizArea">
+        <div class="question-card">
+            <div class="q-text" id="questionText">加载题目中...</div>
+            <div class="options-grid" id="optionsContainer"></div>
+        </div>
+        <div class="action-bar">
+            <button class="nav-btn" id="prevBtn" disabled>← 上一题</button>
+            <div class="flex-row">
+                <!-- 占位 -->
+            </div>
+            <!-- 下一题通过点击选项自动触发，不需要单独按钮，但保留科普已在上方 -->
+        </div>
+        <div style="margin-top: 8px; font-size:0.9rem; color:#487a53;">✨ 点击选项自动进入下一题</div>
+    </div>
+
+    <div id="resultArea" class="result-panel hidden">
+        <!-- 结果会通过js动态渲染 -->
+    </div>
+    
+    <footer>🎻 淡绿 · 交响人格</footer>
+</div>
+
+<!-- 科普模态框 -->
+<div class="modal-overlay" id="knowledgeModal">
+    <div class="modal-card">
+        <div style="display: flex; justify-content: space-between;">
+            <h3>🎵 乐团小百科</h3>
+            <span class="close-modal" id="closeModalBtn">&times;</span>
+        </div>
+        <div style="margin-top: 10px;">
+            <p><strong>🎻 交响乐团 (Orchestra)</strong><br>由弦乐、木管、铜管、打击乐和色彩乐器组成的大型合奏。通常60~100人，演奏交响曲、协奏曲等。</p>
+            <p><strong>🏠 室内乐 (Chamber Music)</strong><br>每个声部只有一件乐器，如弦乐四重奏、木管五重奏。更亲密、细腻的对话。</p>
+            <p><strong>🎺 乐器重奏</strong><br>二重奏、三重奏……讲究默契与平衡，常见钢琴三重奏(钢琴+小提琴+大提琴)等。</p>
+            <p><strong>🌈 色彩乐器</strong><br>竖琴、钢琴、钢片琴、管风琴等，增添梦幻或辉煌音色。</p>
+            <p><em>华彩(Cadenza)：协奏曲中独奏乐器炫技的段落，展现乐器个性。</em></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function(){
+        "use strict";
+
+        // ---------- 清新配色 · 乐器库 ----------
+        const INSTRUMENTS = [
+            { id: 'violin', name: '小提琴', category: '弦乐', role: '乐团首席声部，旋律的主导者，音色明亮细腻。', piece: '维瓦尔第《四季·春》第一乐章华彩，门德尔松e小调协奏曲', desc: '小提琴是弦乐家族的高音成员，表现力极强，既能如歌般抒情，也能炫技灿烂。' },
+            { id: 'viola', name: '中提琴', category: '弦乐', role: '弦乐的中音支柱，温暖内敛，常担任和声与节奏填充。', piece: '柏辽兹《哈罗尔德在意大利》中提琴独奏片段，巴托克中提琴协奏曲', desc: '比小提琴低五度，音色略带忧郁，像一位温柔的叙述者。' },
+            { id: 'cello', name: '大提琴', category: '弦乐', role: '弦乐的低音灵魂，可深情独奏，也可作为节奏基础。', piece: '巴赫《无伴奏大提琴组曲》第一号前奏曲，埃尔加e小调协奏曲第一乐章', desc: '音域接近人声，醇厚丰满，有“音乐贵妇”之称。' },
+            { id: 'doublebass', name: '低音提琴', category: '弦乐', role: '乐团地基，提供深沉的低音支撑，偶尔也有独奏魅力。', piece: '圣桑《动物狂欢节·大象》，博泰西尼低音提琴协奏曲', desc: '体积最大的弦乐器，声音浑厚，是节奏的基石。' },
+            { id: 'flute', name: '长笛', category: '木管', role: '木管中的花腔女高音，灵动清澈，擅长快速跑动与装饰。', piece: '德彪西《牧神午后前奏曲》长笛独奏开头，莫扎特D大调协奏曲', desc: '银铃般的音色，既可以像鸟儿歌唱，也能表现朦胧意境。' },
+            { id: 'piccolo', name: '短笛', category: '木管', role: '乐团最高音，穿透力极强，常用于辉煌或诙谐段落。', piece: '贝多芬《第五交响曲》第四乐章，柴可夫斯基《第四交响曲》谐谑曲', desc: '小巧但耀眼，像星光闪烁，也擅长模仿鸟鸣。' },
+            { id: 'oboe', name: '双簧管', category: '木管', role: '乐团调音基准，音色带有鼻音，擅长悠长旋律与田园风格。', piece: '莫扎特C大调双簧管协奏曲，拉威尔《库普兰之墓》前奏曲', desc: '富有穿透力的芦笛声，常用来表现东方情调或哀愁。' },
+            { id: 'bassoon', name: '巴松', category: '木管', role: '木管组的“大管家”，低沉幽默，也能抒情如歌。', piece: '莫扎特降B大调巴松协奏曲，斯特拉文斯基《春之祭》开头', desc: '音色诙谐、厚重，既能扮演小丑，也能奏出深情的旋律。' },
+            { id: 'clarinet', name: '单簧管', category: '木管', role: '音域宽广，从温柔低语到辉煌高亢，极富表现力。', piece: '莫扎特A大调单簧管协奏曲第二乐章，格什温《蓝色狂想曲》开头', desc: '声音圆润，既能爵士摇摆，也能古典优雅。' },
+            { id: 'saxophone', name: '萨克斯', category: '木管', role: '虽然交响乐中少见，却是管乐团与爵士的灵魂，表现力极强。', piece: '比才《阿莱城姑娘》间奏曲，格拉祖诺夫萨克斯协奏曲', desc: '金属与木质的混合音色，浪漫而富有磁性。' },
+            { id: 'horn', name: '圆号', category: '铜管', role: '铜管与木管的桥梁，音色温和而悠远，擅长表现森林、狩猎。', piece: '理查·施特劳斯《第一圆号协奏曲》，莫扎特圆号协奏曲', desc: '又称法国号，声音圆润，既能雄壮也能朦胧。' },
+            { id: 'trumpet', name: '小号', category: '铜管', role: '辉煌的号角，领导铜管声部，常用于凯旋与宣告。', piece: '海顿降E大调小号协奏曲，马勒《第五交响曲》第一乐章', desc: '明亮、锐利，充满英雄气概和节日氛围。' },
+            { id: 'trombone', name: '长号', category: '铜管', role: '铜管的坚实力量，擅长庄严、宏大的和声与滑音。', piece: '莫扎特《安魂曲》号角声，拉威尔《波莱罗》长号独奏', desc: '通过滑管改变音高，音色雄壮，也有宗教般的肃穆。' },
+            { id: 'tuba', name: '大号', category: '铜管', role: '铜管最低音，支撑整个乐团的和声底座，偶尔也有幽默独奏。', piece: '瓦格纳《纽伦堡的名歌手》前奏曲，沃恩·威廉斯大号协奏曲', desc: '像温柔的大象，深沉而有力。' },
+            { id: 'percussion', name: '打击乐', category: '打击', role: '节奏的骨架与色彩大师，从定音鼓到三角铁，无所不包。', piece: '拉威尔《波莱罗》小军鼓固定节奏，圣桑《骷髅之舞》木琴', desc: '不止是节拍，更是气氛的魔法师。' },
+            { id: 'piano', name: '钢琴', category: '色彩', role: '乐团中的“乐器之王”，可独奏、协奏或作为色彩点缀。', piece: '拉赫玛尼诺夫第二钢琴协奏曲，贝多芬第五钢琴协奏曲“皇帝”', desc: '宽广音域，既能雷鸣也能私语。' },
+            { id: 'harp', name: '竖琴', category: '色彩', role: '天使般的琶音，增添梦幻、流水般的色彩。', piece: '德彪西《神圣与世俗舞曲》，柴可夫斯基《胡桃夹子》花之圆舞曲', desc: '47根弦，拨动心弦的仙境之声。' },
+            { id: 'organ', name: '管风琴', category: '色彩', role: '宏伟的教堂之声，音量与音色变化无穷。', piece: '圣桑第三交响曲“管风琴”，巴赫d小调托卡塔与赋格', desc: '气势磅礴，能模仿整个乐团。' }
+        ];
+
+        // 乐器大类映射
+        const CATEGORIES = ['弦乐', '木管', '铜管', '打击', '色彩'];
+        
+        // ---------- 题库 (30题，贴近MBTI风格，选项映射到乐器积分) ----------
+        // 每个选项对特定乐器加权 (积分累加)
+        const QUESTION_BANK = [
+            { text: '周末你更愿意怎样度过？', options: [
+                { text: '安静阅读或听音乐，享受独处', weights: { violin:2, cello:2, oboe:1, piano:2, harp:1 } },
+                { text: '和朋友聚会聊天，热闹的氛围', weights: { trumpet:2, saxophone:2, percussion:2, horn:1 } },
+                { text: '去户外徒步，感受自然', weights: { flute:2, horn:2, bassoon:1, harp:1 } },
+                { text: '尝试新餐厅或看展览，探索未知', weights: { clarinet:2, viola:1, trombone:1, organ:1 } }
+            ]},
+            { text: '如果参与团队项目，你更倾向于？', options: [
+                { text: '提出创意，引领方向', weights: { violin:2, trumpet:2, flute:2, piano:1 } },
+                { text: '协调关系，保证和谐', weights: { viola:2, horn:2, oboe:2, harp:1 } },
+                { text: '专注执行，把细节做好', weights: { cello:2, bassoon:2, clarinet:2, doublebass:1 } },
+                { text: '提供坚实后盾，查漏补缺', weights: { tuba:2, doublebass:2, percussion:2, bassoon:1 } }
+            ]},
+            { text: '哪种描述更符合你的情绪表达？', options: [
+                { text: '热情外放，喜怒形于色', weights: { trumpet:2, saxophone:2, piccolo:2, percussion:1 } },
+                { text: '内敛深沉，不轻易表露', weights: { cello:2, viola:2, bassoon:2, horn:1 } },
+                { text: '灵动多变，情绪来得快去得快', weights: { flute:2, clarinet:2, violin:2 } },
+                { text: '稳重平和，情绪稳定', weights: { tuba:2, doublebass:2, organ:2, piano:1 } }
+            ]},
+            { text: '你更喜欢哪种故事类型？', options: [
+                { text: '史诗冒险，英雄之旅', weights: { horn:2, trumpet:2, trombone:2, organ:1 } },
+                { text: '浪漫爱情，细腻情感', weights: { violin:2, cello:2, harp:2, oboe:1 } },
+                { text: '悬疑推理，环环相扣', weights: { clarinet:2, bassoon:2, viola:1, percussion:1 } },
+                { text: '奇幻童话，天马行空', weights: { flute:2, piccolo:2, harp:2, celesta:1 } }
+            ]},
+            { text: '朋友通常形容你为？', options: [
+                { text: '可靠的领导者', weights: { trumpet:2, violin:2, piano:1 } },
+                { text: '温柔的倾听者', weights: { viola:2, cello:2, horn:1 } },
+                { text: '幽默的开心果', weights: { bassoon:2, saxophone:2, percussion:2 } },
+                { text: '神秘的思考者', weights: { oboe:2, doublebass:2, organ:1 } }
+            ]},
+            { text: '哪种环境让你最放松？', options: [
+                { text: '安静的图书馆或咖啡馆', weights: { piano:2, cello:2, harp:2, clarinet:1 } },
+                { text: '热闹的派对或音乐节', weights: { percussion:2, saxophone:2, trumpet:1 } },
+                { text: '森林、海边等自然之中', weights: { flute:2, horn:2, oboe:2, harp:1 } },
+                { text: '庄严的教堂或历史建筑', weights: { organ:2, trombone:2, tuba:1 } }
+            ]},
+            { text: '面对压力时，你通常？', options: [
+                { text: '迎难而上，主动解决', weights: { trumpet:2, violin:2, percussion:1 } },
+                { text: '先冷静分析，制定计划', weights: { clarinet:2, bassoon:2, piano:2 } },
+                { text: '寻求朋友倾诉或帮助', weights: { horn:2, viola:2, saxophone:1 } },
+                { text: '暂时转移注意力，自我调节', weights: { flute:2, harp:2, cello:1 } }
+            ]},
+            { text: '你更欣赏哪种艺术风格？', options: [
+                { text: '古典优雅，结构严谨', weights: { violin:2, piano:2, oboe:2 } },
+                { text: '浪漫激情，情感充沛', weights: { cello:2, horn:2, saxophone:2 } },
+                { text: '印象朦胧，色彩斑斓', weights: { harp:2, flute:2, clarinet:1 } },
+                { text: '现代大胆，突破传统', weights: { percussion:2, trombone:2, piccolo:1 } }
+            ]},
+            { text: '如果选择一种颜色代表你？', options: [
+                { text: '热烈的红/橙', weights: { trumpet:2, saxophone:2, percussion:1 } },
+                { text: '宁静的蓝/绿', weights: { cello:2, flute:2, harp:2 } },
+                { text: '温暖的黄/棕', weights: { horn:2, viola:2, bassoon:2 } },
+                { text: '深邃的紫/黑', weights: { organ:2, doublebass:2, trombone:1 } }
+            ]},
+            { text: '你对新事物的态度？', options: [
+                { text: '乐于尝试，不怕改变', weights: { saxophone:2, piccolo:2, percussion:2 } },
+                { text: '谨慎观察，再做决定', weights: { viola:2, bassoon:2, doublebass:1 } },
+                { text: '感兴趣但需要人带', weights: { oboe:2, clarinet:2, horn:1 } },
+                { text: '坚持经典，不太喜欢变化', weights: { organ:2, piano:2, cello:1 } }
+            ]}
+        ];
+
+        // 扩充到30题 (再补充20题，快速生成，保持风格)
+        const extraQuestions = [
+            { text: '你更擅长？', options:[
+                {text:'记住旋律或声音', weights:{violin:2,flute:2,piano:1}},
+                {text:'记住节奏或节拍', weights:{percussion:2,trumpet:2,trombone:1}},
+                {text:'感受和声氛围', weights:{cello:2,horn:2,organ:1}},
+                {text:'分析结构逻辑', weights:{bassoon:2,clarinet:2,viola:1}}
+            ]},
+            { text: '哪种动物更贴近你的气质？', options:[
+                {text:'鹰 — 敏锐、自由', weights:{flute:2,piccolo:2,trumpet:1}},
+                {text:'猫 — 优雅、独立', weights:{violin:2,harp:2,oboe:1}},
+                {text:'熊 — 稳重、有力量', weights:{tuba:2,doublebass:2,cello:1}},
+                {text:'狐狸 — 机智、灵活', weights:{clarinet:2,saxophone:2,bassoon:1}}
+            ]},
+            { text: '在聚会中你通常是？', options:[
+                {text:'活跃气氛的中心', weights:{trumpet:2,saxophone:2,percussion:2}},
+                {text:'与少数人深度聊天', weights:{viola:2,cello:2,horn:1}},
+                {text:'安静观察', weights:{oboe:2,doublebass:2,piano:1}},
+                {text:'帮忙张罗食物/后勤', weights:{bassoon:2,harp:2,tuba:1}}
+            ]},
+            { text: '哪种天气让你心情最好？', options:[
+                {text:'阳光明媚', weights:{flute:2,trumpet:2,violin:1}},
+                {text:'细雨绵绵', weights:{cello:2,oboe:2,harp:2}},
+                {text:'多云凉爽', weights:{clarinet:2,horn:2,viola:1}},
+                {text:'大雪纷飞', weights:{organ:2,piano:2,doublebass:1}}
+            ]},
+            { text: '选择一部电影类型？', options:[
+                {text:'史诗/历史', weights:{horn:2,trombone:2,organ:1}},
+                {text:'文艺/剧情', weights:{violin:2,cello:2,piano:2}},
+                {text:'动画/奇幻', weights:{harp:2,flute:2,piccolo:2}},
+                {text:'动作/冒险', weights:{trumpet:2,percussion:2,saxophone:1}}
+            ]},
+            { text: '你更注重？', options:[
+                {text:'个人成就与影响力', weights:{trumpet:2,violin:2,piano:1}},
+                {text:'人际关系与和谐', weights:{viola:2,horn:2,oboe:1}},
+                {text:'知识深度与真理', weights:{cello:2,bassoon:2,organ:1}},
+                {text:'自由与体验', weights:{flute:2,saxophone:2,harp:1}}
+            ]},
+            { text: '哪种声音更吸引你？', options:[
+                {text:'高亢清亮', weights:{piccolo:2,flute:2,trumpet:1}},
+                {text:'温暖醇厚', weights:{cello:2,horn:2,clarinet:1}},
+                {text:'低沉震撼', weights:{tuba:2,doublebass:2,organ:1}},
+                {text:'清脆节奏', weights:{percussion:2,harp:2,piano:1}}
+            ]},
+            { text: '你习惯怎样的工作节奏？', options:[
+                {text:'快速冲刺，集中突破', weights:{trumpet:2,piccolo:2,saxophone:1}},
+                {text:'稳步推进，持续输出', weights:{cello:2,viola:2,bassoon:2}},
+                {text:'灵活多变，随性而为', weights:{flute:2,clarinet:2,percussion:1}},
+                {text:'深思熟虑，慢工细活', weights:{organ:2,piano:2,doublebass:1}}
+            ]},
+            { text: '你更向往哪种旅行？', options:[
+                {text:'繁华都市', weights:{saxophone:2,trumpet:2,piano:1}},
+                {text:'古镇水乡', weights:{violin:2,oboe:2,harp:2}},
+                {text:'高山草原', weights:{horn:2,flute:2,cello:1}},
+                {text:'历史遗迹', weights:{trombone:2,organ:2,tuba:1}}
+            ]},
+            { text: '哪种艺术形式更打动你？', options:[
+                {text:'舞蹈的韵律', weights:{percussion:2,harp:2,flute:1}},
+                {text:'绘画的色彩', weights:{viola:2,clarinet:2,oboe:1}},
+                {text:'建筑的宏伟', weights:{organ:2,trombone:2,tuba:1}},
+                {text:'诗歌的意象', weights:{cello:2,piano:2,horn:1}}
+            ]}
+        ];
+
+        // 再补10题 …… 直接用上面extraQuestions 但需要满30，合并后目前10+10=20，再增加10
+        const more = [
+            { text: '你对规则的态度？', options:[
+                {text:'遵守规则，有条理', weights:{piano:2,oboe:2,doublebass:1}},
+                {text:'必要时灵活变通', weights:{clarinet:2,viola:2,horn:1}},
+                {text:'喜欢打破常规', weights:{saxophone:2,percussion:2,piccolo:1}},
+                {text:'创造自己的规则', weights:{trumpet:2,organ:2,flute:1}}
+            ]},
+            { text: '如果学习新技能，你倾向于？', options:[
+                {text:'独自钻研', weights:{piano:2,cello:2,organ:1}},
+                {text:'找老师或课程', weights:{violin:2,oboe:2,bassoon:1}},
+                {text:'和朋友一起学', weights:{horn:2,saxophone:2,percussion:1}},
+                {text:'在实践中摸索', weights:{flute:2,clarinet:2,trumpet:1}}
+            ]},
+            { text: '你更可能因为什么而感动？', options:[
+                {text:'宏大的胜利场面', weights:{trumpet:2,trombone:2,organ:1}},
+                {text:'细腻的情感瞬间', weights:{violin:2,cello:2,harp:2}},
+                {text:'大自然的壮美', weights:{horn:2,flute:2,doublebass:1}},
+                {text:'人性的温暖故事', weights:{viola:2,oboe:2,clarinet:1}}
+            ]},
+            { text: '哪种角色更像你？', options:[
+                {text:'开拓者', weights:{trumpet:2,saxophone:2,piccolo:1}},
+                {text:'守护者', weights:{tuba:2,doublebass:2,horn:1}},
+                {text:'协调者', weights:{viola:2,harp:2,oboe:1}},
+                {text:'思想者', weights:{piano:2,cello:2,organ:1}}
+            ]},
+            { text: '你更享受？', options:[
+                {text:'站在舞台中央', weights:{violin:2,trumpet:2,flute:2}},
+                {text:'幕后支持团队', weights:{bassoon:2,tuba:2,percussion:1}},
+                {text:'与他人合作共创', weights:{horn:2,clarinet:2,viola:1}},
+                {text:'独立完成作品', weights:{piano:2,cello:2,harp:1}}
+            ]},
+            { text: '哪种挑战更吸引你？', options:[
+                {text:'智力谜题', weights:{piano:2,clarinet:2,organ:1}},
+                {text:'体能竞技', weights:{percussion:2,trumpet:2,trombone:1}},
+                {text:'艺术创作', weights:{violin:2,harp:2,flute:1}},
+                {text:'社交博弈', weights:{saxophone:2,oboe:2,viola:1}}
+            ]},
+            { text: '你心中理想的生活是？', options:[
+                {text:'充满激情与变化', weights:{saxophone:2,piccolo:2,percussion:2}},
+                {text:'宁静和谐，岁月静好', weights:{cello:2,harp:2,oboe:2}},
+                {text:'深刻有内涵，不断成长', weights:{piano:2,organ:2,bassoon:1}},
+                {text:'自由自在，无拘无束', weights:{flute:2,horn:2,clarinet:1}}
+            ]},
+            { text: '哪种比喻更贴近你的思维方式？', options:[
+                {text:'像溪流一样灵动', weights:{flute:2,clarinet:2,violin:1}},
+                {text:'像大海一样深沉', weights:{cello:2,doublebass:2,organ:1}},
+                {text:'像火焰一样热烈', weights:{trumpet:2,saxophone:2,percussion:1}},
+                {text:'像山脉一样稳固', weights:{tuba:2,trombone:2,horn:1}}
+            ]},
+            { text: '在团队中，你更看重？', options:[
+                {text:'效率与结果', weights:{trumpet:2,percussion:2,piano:1}},
+                {text:'凝聚力与氛围', weights:{horn:2,viola:2,harp:1}},
+                {text:'创新与突破', weights:{saxophone:2,flute:2,piccolo:1}},
+                {text:'稳定与秩序', weights:{doublebass:2,tuba:2,organ:1}}
+            ]},
+            { text: '你更容易被哪种音乐吸引？', options:[
+                {text:'辉煌的铜管', weights:{trumpet:2,trombone:2,horn:2}},
+                {text:'流淌的弦乐', weights:{violin:2,cello:2,viola:2}},
+                {text:'灵动的木管', weights:{flute:2,clarinet:2,oboe:2}},
+                {text:'震撼的打击乐', weights:{percussion:2,timpani:2,piano:1}}
+            ]}
+        ];
+
+        const FULL_QUESTIONS = QUESTION_BANK.concat(extraQuestions, more); // 30题
+
+        // ---------- 全局状态 ----------
+        let shuffledQuestions = [];
+        let currentIndex = 0;
+        let answers = new Array(30).fill(null); // 存储选项索引
+        let instrumentScores = {}; // 各乐器积分
+
+        // DOM
+        const quizArea = document.getElementById('quizArea');
+        const resultArea = document.getElementById('resultArea');
+        const questionText = document.getElementById('questionText');
+        const optionsDiv = document.getElementById('optionsContainer');
+        const prevBtn = document.getElementById('prevBtn');
+        const progressDisplay = document.getElementById('progressDisplay');
+        const knowledgeBtn = document.getElementById('knowledgeBtn');
+        const modal = document.getElementById('knowledgeModal');
+        const closeModal = document.getElementById('closeModalBtn');
+
+        // 初始化乐器积分
+        function initScores() {
+            INSTRUMENTS.forEach(inst => { instrumentScores[inst.id] = 0; });
+        }
+
+        // 打乱题目
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // 重置测试
+        function resetTest() {
+            shuffledQuestions = shuffleArray([...FULL_QUESTIONS]);
+            currentIndex = 0;
+            answers = new Array(30).fill(null);
+            initScores();
+            showQuizView();
+            renderQuestion();
+        }
+
+        // 重新计算所有积分 (基于answers)
+        function recalcAllScores() {
+            initScores();
+            for (let i = 0; i < answers.length; i++) {
+                const optIdx = answers[i];
+                if (optIdx === null) continue;
+                const question = shuffledQuestions[i];
+                const weights = question.options[optIdx].weights;
+                for (let [instId, val] of Object.entries(weights)) {
+                    if (instrumentScores.hasOwnProperty(instId)) {
+                        instrumentScores[instId] += val;
+                    }
+                }
+            }
+        }
+
+        // 处理选项点击
+        function onOptionClick(optIndex) {
+            if (currentIndex >= shuffledQuestions.length) return;
+            // 记录答案
+            answers[currentIndex] = optIndex;
+            recalcAllScores();
+
+            // 如果是最后一题，显示结果
+            if (currentIndex === shuffledQuestions.length - 1) {
+                showResultView();
+            } else {
+                currentIndex++;
+                renderQuestion();
+            }
+        }
+
+        // 渲染当前题目
+        function renderQuestion() {
+            const q = shuffledQuestions[currentIndex];
+            questionText.textContent = q.text;
+            progressDisplay.textContent = `${currentIndex+1} / ${shuffledQuestions.length}`;
+            
+            let html = '';
+            q.options.forEach((opt, idx) => {
+                const selectedClass = (answers[currentIndex] === idx) ? 'selected' : '';
+                html += `<button class="option-btn ${selectedClass}" data-opt-index="${idx}">${opt.text}</button>`;
+            });
+            optionsDiv.innerHTML = html;
+            
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const idx = parseInt(btn.dataset.optIndex);
+                    onOptionClick(idx);
+                });
+            });
+
+            prevBtn.disabled = (currentIndex === 0);
+        }
+
+        // 上一题
+        function goPrev() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderQuestion();
+            }
+        }
+
+        // 显示结果 + 雷达图 + 介绍
+        function showResultView() {
+            quizArea.classList.add('hidden');
+            resultArea.classList.remove('hidden');
+            
+            recalcAllScores();
+            
+            // 找出最高分乐器
+            let topInstId = null, maxScore = -1;
+            for (let inst of INSTRUMENTS) {
+                if (instrumentScores[inst.id] > maxScore) {
+                    maxScore = instrumentScores[inst.id];
+                    topInstId = inst.id;
+                }
+            }
+            const topInstrument = INSTRUMENTS.find(i => i.id === topInstId);
+            
+            // 计算类别总分
+            const catScores = { '弦乐':0, '木管':0, '铜管':0, '打击':0, '色彩':0 };
+            INSTRUMENTS.forEach(inst => {
+                catScores[inst.category] += instrumentScores[inst.id];
+            });
+            const maxCat = Math.max(...Object.values(catScores), 1);
+            
+            // 构建结果HTML
+            let barsHtml = '';
+            for (let cat of CATEGORIES) {
+                const score = catScores[cat];
+                const percent = Math.round((score / maxCat) * 100);
+                barsHtml += `<div class="cat-item"><div class="cat-label"><span>${cat}</span><span>${score}</span></div><div class="bar-bg"><div class="bar-fill" style="width:${percent}%;"></div></div></div>`;
+            }
+            
+            const resultHtml = `
+                <div class="instrument-highlight">
+                    <span class="inst-name">${topInstrument.name}</span>
+                    <span class="inst-category">${topInstrument.category}</span>
+                </div>
+                <div class="desc-text">${topInstrument.desc}</div>
+                <div class="role-box"><strong>🎭 乐团角色</strong><br>${topInstrument.role}</div>
+                <div class="piece-box"><strong>🎵 传世华彩/名曲</strong><br>${topInstrument.piece}</div>
+                <div class="chart-container">
+                    <canvas id="radarChart"></canvas>
+                </div>
+                <div><strong>📊 声音倾向比重</strong></div>
+                <div class="category-bars">${barsHtml}</div>
+                <button class="retest-btn" id="retestBtn">🔄 重新探索</button>
+            `;
+            resultArea.innerHTML = resultHtml;
+            
+            // 绘制雷达图
+            const ctx = document.getElementById('radarChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: CATEGORIES,
+                    datasets: [{
+                        label: '你的声音光谱',
+                        data: CATEGORIES.map(c => catScores[c]),
+                        backgroundColor: '#a1c99a80',
+                        borderColor: '#2d6a4b',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#1e5a30',
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { r: { beginAtZero: true, ticks: { stepSize: 5 } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+            
+            document.getElementById('retestBtn').addEventListener('click', () => {
+                resetTest();
+            });
+        }
+
+        function showQuizView() {
+            resultArea.classList.add('hidden');
+            quizArea.classList.remove('hidden');
+        }
+
+        // 科普弹窗
+        knowledgeBtn.addEventListener('click', ()=> modal.style.display = 'flex');
+        closeModal.addEventListener('click', ()=> modal.style.display = 'none');
+        modal.addEventListener('click', (e) => { if(e.target === modal) modal.style.display = 'none'; });
+
+        // 绑定上一题
+        prevBtn.addEventListener('click', goPrev);
+
+        // 启动
+        initScores();
+        resetTest();
+
+        // 补充打击乐细化映射 (没有timpani单独，但打击乐已经包含)
+    })();
+</script>
+</body>
+</html>
